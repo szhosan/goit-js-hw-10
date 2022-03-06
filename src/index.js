@@ -10,25 +10,26 @@ const refs = {
   infoDivRef: document.querySelector('.country-info'),
 };
 
-console.log(refs.inputRef);
 refs.inputRef.addEventListener('input', debounce(onInput, DEBOUNCE_DELAY));
 
 function onInput(e) {
   const requestText = e.target.value.trim();
   clearMarkup();
+  if (requestText.length === 0) {
+    return;
+  }  
   fetchCountries(requestText)
     .then(result => {
-      //console.log(result);
       if (result.status === 404) {
         Notify.failure('Oops, there is no country with that name');
         return;
       }
       if (result.length <= 10) {
         createListMarkup(result);
-      }
+      } else Notify.info('Too many matches found. Please enter a more specific name.');
       if (result.length === 1) {
         createCountryInfoMarkup(result[0]);
-      } else Notify.info('Too many matches found. Please enter a more specific name.');
+      }
     })
     .catch(e => console.log(`CATCH: ${e}`));
 }
@@ -42,22 +43,18 @@ function createListMarkup(countryList) {
 }
 
 function createCountryInfoMarkup(country) {
-  console.log(country);
   let languages = '';
-  for (let language of Object.values(country.languages))
-  {
-      languages += language + ", ";
+  for (let language of Object.values(country.languages)) {
+    languages += language + ', ';
   }
-  languages = languages.slice(0, languages.length-2);
+  languages = languages.slice(0, languages.length - 2);
   let markup = `<p><span>Capital: </span>${country.capital}</p>
   <p><span>Population: </span>${country.population}</p>
   <p><span>Languages: </span>${languages}</p>`;
   refs.infoDivRef.innerHTML = markup;
 }
 
-
-function clearMarkup()
-{
-    refs.ulRef.innerHTML = '';
-    refs.infoDivRef.innerHTML = '';
+function clearMarkup() {
+  refs.ulRef.innerHTML = '';
+  refs.infoDivRef.innerHTML = '';
 }
